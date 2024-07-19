@@ -1,0 +1,36 @@
+#version 460
+
+layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+layout(binding = 0, rgba8ui) uniform restrict uimage2D gBufferImage;
+layout(push_constant, std140) uniform pc {
+	int srcx;
+	int srcy;
+	int dstx;
+	int dsty;
+	int cpyx;
+	int cpyy;
+	uint colorRGBA;
+	int blendConstant;
+};
+
+uvec4 pxaBlend(uvec4 s, uvec4 d) {
+	uvec3 oc = s.rgb * s.a + d.rgb * (255 - s.a);
+	return uvec4(oc / 255, 255);
+}
+
+void main() {
+	int x = int(gl_GlobalInvocationID.x);
+	int y = int(gl_GlobalInvocationID.y);
+	int xd = x + dstx;
+	int yd = y + dsty;
+	if(x >= cpyx || y >= cpyy) {
+		return;
+	}
+	uvec4 fl = uvec4(
+		((colorRGBA & 0xFF000000) >> 24),
+		((colorRGBA & 0x00FF0000) >> 16),
+		((colorRGBA & 0x0000FF00) >> 8),
+		colorRGBA & 0x000000FF);
+	uvec4 cl = uvec4(imageLoad(gBufferImage, ivec2(xd, yd)));
+	imageStore(gBufferImage, ivec2(xd, yd), pxaBlend(fl, cl));
+}

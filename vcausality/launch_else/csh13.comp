@@ -1,0 +1,30 @@
+#version 460
+
+layout(local_size_x = 20, local_size_y = 40, local_size_z = 1) in;
+layout(binding = 0, rgba8ui) uniform readonly uimage2D srcImage;
+layout(binding = 1, rgba8ui) uniform restrict uimage2D gBufferImage;
+
+layout(binding = 2, std430) buffer Dst {
+	ivec2 dst[48];
+};
+layout(binding = 3) uniform Cell {
+	ivec4 src[12];
+};
+
+uvec4 pxaBlend(uvec4 s, uvec4 d) {
+	uvec3 oc = s.rgb * s.a + d.rgb * (255 - s.a);
+	return uvec4(oc / 255, 255);
+}
+
+void main() {
+	int x = int(gl_GlobalInvocationID.x);
+	int y = int(gl_GlobalInvocationID.y);
+	int z = int(gl_GlobalInvocationID.z);
+	int p = z >> 2;
+	int q = z & 3;
+	ivec2 srcv = ivec2(src[p][q] * 20 + x + 200, y + 825);
+	ivec2 dstv = ivec2(dst[z].x + x, dst[z].y + y);
+	uvec4 px = imageLoad(srcImage, srcv);
+	uvec4 qx = imageLoad(gBufferImage, dstv);
+	imageStore(gBufferImage, dstv, pxaBlend(px, qx));
+}

@@ -1,0 +1,24 @@
+#version 460
+
+layout(local_size_x = 24, local_size_y = 24, local_size_z = 1) in;
+layout(binding = 0, rgba8ui) uniform readonly uimage2D srcImage;
+layout(binding = 1, rgba8ui) uniform restrict uimage2D gBufferImage;
+
+layout(binding = 2, std430) buffer Dst {
+	ivec2 dst[12];
+};
+layout(binding = 3) uniform Cell {
+	ivec4 src[6];
+};
+
+void main() {
+	int x = int(gl_GlobalInvocationID.x);
+	int y = int(gl_GlobalInvocationID.y);
+	int z = int(gl_GlobalInvocationID.z);
+	int p = z >> 1;
+	int q = (z & 1) << 1;
+	ivec2 srcv = ivec2(src[p][q + 1] * 24 + x + 603, src[p][q] * 24 + y + 336);
+	ivec2 dstv = ivec2(dst[z].x + x, dst[z].y + y);
+	uvec4 px = imageLoad(srcImage, srcv);
+	imageStore(gBufferImage, dstv, px);
+}
