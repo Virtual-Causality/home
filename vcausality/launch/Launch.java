@@ -62,6 +62,8 @@ public class Launch {
 	private static ByteBuffer icon48;
 	private static GLFWImage.Buffer icon;
 	
+	private static final String SHAFT_VERSION = "1.0.2";
+	
 	private static final int SEGMENT_CLOCK_IDX = 0;
 	private static final int SEGMENT_LEVEL_IDX = 1;
 	private static final int SEGMENT_WAIT_IDX = 2;
@@ -675,7 +677,7 @@ public class Launch {
 			cur_v = 0;
 		} else if(k == kcde[KEY_CXL]) {
 			play(SE_CXL);
-			if(p_stat.code == GSTAT_P_P) {
+			if(p_stat.code > 0) { // <---   "> 0" 1.5.0~
 				g_stat = gstat_p_p;
 			} else {
 				g_stat = gstat_p_n;
@@ -762,11 +764,17 @@ public class Launch {
 				play(SE_DEC);
 				cur_h = 0;
 				cfg_sel = false;
+				if(cur_v == BAR_HP) {
+					barColor();
+				}
 			} else if(k == kcde[KEY_CXL]) {
 				play(SE_CXL);
 				sgsw[cur_v] = cur_k;
 				cur_h = 0;
 				cfg_sel = false;
+				if(cur_v == BAR_HP) {
+					barColor();
+				}
 			} else if(k == kcde[KEY_RST]) {
 				play(SE_CV);
 				cur_h = sgdf[cur_v];
@@ -2690,8 +2698,10 @@ public class Launch {
 				LOCAL.srcCoord(651, 716).dstCoord(164, 243).cpyRegion(244, 52).copy(c, i);
 				ascii(c, i, 164, 303, "GPU Name:");
 				ascii(c, i, 172, 323, getGPUName());
-				ascii(c, i, 164, 363, "Driver Version: "+ getDriverVersion());
+				ascii(c, i, 164, 363, "GPU Driver Version: "+ getDriverVersion());
 				ascii(c, i, 164, 403, "Vulkan API Version: "+ getAPIVersion());
+				ascii(c, i, 164, 443, "JVM Version: "+ System.getProperty("java.vm.version"));
+				ascii(c, i, 164, 483, "Shaft "+ SHAFT_VERSION);
 				ascii(c, i, 164, 853, "["+ gcde[KEY_CXL] +"] Back");
 			} else if(g_stat.code == GSTAT_T_I2_LIC) {
 				LOCAL.srcCoord(651, 768).dstCoord(164, 243).cpyRegion(244, 52).copy(c, i);

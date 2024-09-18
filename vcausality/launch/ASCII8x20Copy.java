@@ -73,7 +73,7 @@ public class ASCII8x20Copy {
 			
 			var cde0 = LaunchRenderer3.class.getResourceAsStream(CSH_NAME);
 			if(cde0 == null) {
-				throw new RuntimeException("Vertex shader has not found\n");
+				throw new RuntimeException("shader 08 has not found\n");
 			}
 			try {
 				byte[] bf = cde0.readAllBytes();
